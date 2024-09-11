@@ -1101,11 +1101,15 @@ func (s *Server) Index(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	applyCmdLock, err := s.ApplyLocker.CheckApplyLock()
-	s.Logger.Info("Apply Lock: %v", applyCmdLock)
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		fmt.Fprintf(w, "Could not retrieve global apply lock: %s", err)
 		return
+	}
+	if applyCmdLock.Locked {
+		s.Logger.Info("Apply Lock: %v", applyCmdLock)
+	} else {
+		s.Logger.Debug("Apply Lock: %v", applyCmdLock)
 	}
 
 	applyLockData := web_templates.ApplyLockData{
